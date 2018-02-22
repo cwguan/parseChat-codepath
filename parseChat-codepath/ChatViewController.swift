@@ -20,6 +20,8 @@ class ChatViewController: UIViewController, UITableViewDataSource {
     @IBAction func onSend(_ sender: Any) {
         let chatMessage = PFObject(className: "Message")
         chatMessage["text"] = chatMessageField.text ?? ""
+        chatMessage["user"] = PFUser.current()
+        
         chatMessage.saveInBackground { (success, error) in
             if success {
                 print("The message was saved!")
@@ -48,7 +50,17 @@ class ChatViewController: UIViewController, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatCell", for: indexPath) as! ChatCell
-        cell.chatLabel.text = messages[indexPath.row]["text"] as? String
+        
+        let chatMessage = messages[indexPath.row]
+        
+        cell.chatLabel.text = chatMessage["text"] as? String
+        
+        if let user = chatMessage["user"] as? PFUser {
+            cell.usernameLabel.text = user.username
+        } else {
+            cell.usernameLabel.text = "🤖"
+        }
+        
         return cell
     }
     
@@ -61,6 +73,7 @@ class ChatViewController: UIViewController, UITableViewDataSource {
     // Query Parse for all messages every second
     func queryMessages() {
         let query = PFQuery(className: "Message")
+        query.includeKey("user")
         query.addDescendingOrder("createdAt")
         
         query.findObjectsInBackground { (response, error) in
