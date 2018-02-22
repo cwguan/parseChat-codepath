@@ -9,9 +9,12 @@
 import UIKit
 import Parse
 
-class ChatViewController: UIViewController {
+class ChatViewController: UIViewController, UITableViewDataSource {
+    
+    var messages: [PFObject] = []
 
     @IBOutlet weak var chatMessageField: UITextField!
+    @IBOutlet weak var chatTableView: UITableView!
     
     
     @IBAction func onSend(_ sender: Any) {
@@ -30,8 +33,11 @@ class ChatViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        chatTableView.dataSource = self
+        chatTableView.rowHeight = UITableViewAutomaticDimension
+        chatTableView.estimatedRowHeight = 50
+        
+        queryMessages()
     }
 
     override func didReceiveMemoryWarning() {
@@ -39,7 +45,36 @@ class ChatViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ChatCell", for: indexPath) as! ChatCell
+        cell.chatLabel.text = messages[indexPath.row]["text"] as? String
+        return cell
+    }
+    
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return messages.count
+    }
+    
+    
+    // Query Parse for all messages every second
+    func queryMessages() {
+        let query = PFQuery(className: "Message")
+        query.addDescendingOrder("createdAt")
+        
+        query.findObjectsInBackground { (response, error) in
+            if let messages = response {
+                self.messages = messages
+                self.chatTableView.reloadData()
+            } else {
+                print(error?.localizedDescription)
+            }
+            
+        }
+        
+    }
+    
     /*
     // MARK: - Navigation
 
