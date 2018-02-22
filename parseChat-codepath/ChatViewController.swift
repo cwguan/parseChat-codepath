@@ -12,7 +12,8 @@ import Parse
 class ChatViewController: UIViewController, UITableViewDataSource {
     
     var messages: [PFObject] = []
-
+    var timer: Timer?
+    
     @IBOutlet weak var chatMessageField: UITextField!
     @IBOutlet weak var chatTableView: UITableView!
     
@@ -40,6 +41,7 @@ class ChatViewController: UIViewController, UITableViewDataSource {
         chatTableView.estimatedRowHeight = 50
         
         queryMessages()
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(queryMessages), userInfo: nil, repeats: true)
     }
 
     override func didReceiveMemoryWarning() {
@@ -71,7 +73,7 @@ class ChatViewController: UIViewController, UITableViewDataSource {
     
     
     // Query Parse for all messages every second
-    func queryMessages() {
+    @objc func queryMessages() {
         let query = PFQuery(className: "Message")
         query.includeKey("user")
         query.addDescendingOrder("createdAt")
