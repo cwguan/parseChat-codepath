@@ -18,6 +18,12 @@ class ChatViewController: UIViewController, UITableViewDataSource {
     @IBOutlet weak var chatTableView: UITableView!
     
     
+    @IBAction func onLogout(_ sender: Any) {
+        PFUser.logOut()
+        performSegue(withIdentifier: "logoutSegue", sender: nil)
+    }
+    
+    
     @IBAction func onSend(_ sender: Any) {
         let chatMessage = PFObject(className: "Message")
         chatMessage["text"] = chatMessageField.text ?? ""
