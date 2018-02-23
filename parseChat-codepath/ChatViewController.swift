@@ -41,7 +41,19 @@ class ChatViewController: UIViewController, UITableViewDataSource {
         chatTableView.estimatedRowHeight = 50
         
         queryMessages()
+        
+        // Is timer necessary with refreshControl & pull-to-update?
         timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(queryMessages), userInfo: nil, repeats: true)
+        
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshControlAction(_:)), for: UIControlEvents.valueChanged)
+        chatTableView.insertSubview(refreshControl, at: 0)
+    }
+    
+    
+    @objc func refreshControlAction(_ refreshControl: UIRefreshControl) {
+        queryMessages()
+        refreshControl.endRefreshing()
     }
 
     override func didReceiveMemoryWarning() {
